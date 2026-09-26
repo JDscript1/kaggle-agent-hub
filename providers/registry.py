@@ -56,6 +56,14 @@ def adapter_for(name: str) -> BaseProvider:
     return OpenAICompatibleProvider()
 
 
+def agent_model(name: str, config: ProviderConfig):
+    """Return an agent-loop callback for providers with native tool calling."""
+    adapter = adapter_for(name)
+    if not adapter.supports_tools():
+        raise ValueError(f"{name} does not support agent tool calling yet.")
+    return lambda messages, tools: adapter.generate_turn(messages, config, tools)
+
+
 def make_config(name: str, model: str, api_key: str, base_url: str, temperature: float, max_tokens: int) -> ProviderConfig:
     p = preset(name)
     return ProviderConfig(
