@@ -8,11 +8,14 @@ def test_runtime_context_identifies_workspace_and_capabilities(monkeypatch, tmp_
     from dataclasses import replace
 
     monkeypatch.setattr(workspace, "CONFIG", replace(CONFIG, workspace=tmp_path))
+    (tmp_path / "analysis.ipynb").write_text("{}", encoding="utf-8")
     context = runtime_context()
 
     assert "Termux on Android" in context
     assert f"active workspace: {tmp_path}" in context
     assert "available agent capabilities" in context
+    assert "notebook files in workspace: analysis.ipynb" in context
+    assert "live Kaggle UI cell insertion is not exposed" in context
     assert "API_KEY=" not in context
 
 
