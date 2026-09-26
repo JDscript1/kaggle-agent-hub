@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable
 
 from core.logging_store import LOGS
-from core.notebook import NotebookError, delete_cell, insert_cell, list_cells, read_cell, update_cell
+from core.notebook import NotebookError, delete_cell, execute_cell, insert_cell, list_cells, read_cell, update_cell
 from core.terminal import TerminalError, execute_terminal
 from core.workspace import WorkspaceError, root, safe_path
 
@@ -362,6 +362,7 @@ def default_tool_registry() -> ToolRegistry:
             AgentTool("insert_cell", "Insert a code, markdown, or raw cell into a saved .ipynb file.", {"type": "object", "required": ["path", "source"], "properties": {"path": {"type": "string"}, "index": {"type": "integer"}, "cell_type": {"type": "string"}, "source": {"type": "string"}}}, lambda args: _notebook_call(insert_cell, args)),
             AgentTool("update_cell", "Update one cell in a saved .ipynb file and clear stale code outputs by default.", {"type": "object", "required": ["path", "index", "source"], "properties": {"path": {"type": "string"}, "index": {"type": "integer"}, "source": {"type": "string"}, "clear_outputs": {"type": "boolean"}}}, lambda args: _notebook_call(update_cell, args)),
             AgentTool("delete_cell", "Delete one cell from a saved .ipynb file with an explicit empty-notebook safeguard.", {"type": "object", "required": ["path", "index"], "properties": {"path": {"type": "string"}, "index": {"type": "integer"}, "allow_empty": {"type": "boolean"}}}, lambda args: _notebook_call(delete_cell, args)),
+            AgentTool("execute_cell", "Execute a code cell and its preceding notebook cells in a temporary kernel.", {"type": "object", "required": ["path", "index"], "properties": {"path": {"type": "string"}, "index": {"type": "integer"}, "timeout": {"type": "integer"}, "kernel_name": {"type": "string"}}}, lambda args: _notebook_call(execute_cell, args)),
         ]
     )
 

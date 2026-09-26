@@ -14,7 +14,7 @@ def registry(tmp_path, monkeypatch):
 
 
 def test_registry_exposes_schemas_and_structured_results(registry):
-    assert registry.names() == ["read_file", "list_files", "search_files", "write_file", "patch_file", "terminal_exec", "list_cells", "read_cell", "insert_cell", "update_cell", "delete_cell"]
+    assert registry.names() == ["read_file", "list_files", "search_files", "write_file", "patch_file", "terminal_exec", "list_cells", "read_cell", "insert_cell", "update_cell", "delete_cell", "execute_cell"]
     result = registry.execute("write_file", {"path": "src/app.py", "content": "print('ok')\n"})
     assert result.success
     assert result.to_dict()["data"]["path"] == "src/app.py"
@@ -111,3 +111,11 @@ def test_notebook_tools_list_insert_update_and_delete_cells(registry, tmp_path):
     assert read.data["source"] == "print(2)"
     deleted = registry.execute("delete_cell", {"path": "analysis.ipynb", "index": 0})
     assert deleted.success
+
+
+def test_notebook_execute_cell_runs_prefix_and_persists_output(registry, tmp_path):
+    notebook = tmp_path / "run.ipynb"
+    notebook.write_text('{"cells": [{"cell_type": "code", "metadata": {}, "source": ["value = 40\\n"], "outputs": [], "execution_count": null}, {"cell_type": "code", "metadata": {}, "source": ["print(value + 2)\\n"], "outputs": [], "execution_count": null}], "metadata": {}, "nbformat": 4, "nbformat_minor": 5}', encoding="utf-8")
+    result = registry.execute("execute_cell", {"path": "run.ipynb", "index": 1})
+    assert result.success
+    assert "42" in result.data["output"]
