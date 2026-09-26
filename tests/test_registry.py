@@ -3,7 +3,7 @@ from providers.registry import names, preset
 
 def test_core_providers_present():
     providers = set(names())
-    assert {"OpenAI / Codex API", "Anthropic", "Google Gemini", "DeepSeek", "Kimi / Moonshot"} <= providers
+    assert {"OpenAI / Codex API", "Anthropic", "Google Gemini", "DeepSeek", "Kimi / Moonshot", "Qwen / DashScope"} <= providers
 
 
 def test_presets_have_env_names():

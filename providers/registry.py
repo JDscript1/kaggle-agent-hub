@@ -26,6 +26,7 @@ PRESETS: dict[str, ProviderPreset] = {
     "Google Gemini": ProviderPreset("Google Gemini", "GEMINI_API_KEY", "https://generativelanguage.googleapis.com/v1beta", "gemini-2.5-pro", "gemini"),
     "DeepSeek": ProviderPreset("DeepSeek", "DEEPSEEK_API_KEY", "https://api.deepseek.com", "deepseek-chat"),
     "Kimi / Moonshot": ProviderPreset("Kimi / Moonshot", "MOONSHOT_API_KEY", "https://api.moonshot.ai/v1", "kimi-k2"),
+    "Qwen / DashScope": ProviderPreset("Qwen / DashScope", "DASHSCOPE_API_KEY", "https://dashscope.aliyuncs.com/compatible-mode/v1", "qwen-plus", note="Uses DashScope's OpenAI-compatible API endpoint."),
     "OpenRouter": ProviderPreset("OpenRouter", "OPENROUTER_API_KEY", "https://openrouter.ai/api/v1", "openai/gpt-5.1"),
     "Mistral": ProviderPreset("Mistral", "MISTRAL_API_KEY", "https://api.mistral.ai/v1", "mistral-large-latest"),
     "Groq": ProviderPreset("Groq", "GROQ_API_KEY", "https://api.groq.com/openai/v1", "llama-3.3-70b-versatile"),

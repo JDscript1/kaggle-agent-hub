@@ -6,6 +6,7 @@ The UI includes configurable presets for:
 - Anthropic
 - Google Gemini
 - DeepSeek
+- Qwen / DashScope
 - Kimi / Moonshot
 - OpenRouter
 - Mistral
@@ -21,4 +22,4 @@ Model names and endpoints are editable because provider catalogs change over tim
 
 An API key and a consumer subscription login are different credentials. Kaggle Agent Hub keeps them separate.
 
-For coding-agent behavior, use the `CLI Agents` tab after authenticating the corresponding CLI in the environment. For ordinary API chat, use the `Chat` tab and an API key.
+For coding-agent behavior, use the `CLI Agents` tab after authenticating the corresponding CLI in the environment. For ordinary API chat, use the `Chat` tab or save a key in `Settings`. Settings keys are session-only and are never used as subscription credentials.

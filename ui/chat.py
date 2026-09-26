@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from core.logging_store import LOGS
 from core.secrets import resolve_secret
-from core.session import clone_session
+from core.session import clone_session, provider_setting
 from core.workspace import context_snapshot
 from providers.base import ProviderError
 from providers.registry import adapter_for, make_config, preset
@@ -39,8 +39,11 @@ def respond(
         return history, state, ""
 
     p = preset(provider_name)
-    secret = resolve_secret(api_key, p.env_key)
-    cfg = make_config(provider_name, model, secret, base_url, temperature, max_tokens)
+    saved = provider_setting(state, provider_name)
+    effective_model = model or saved["model"]
+    effective_base_url = base_url or saved["base_url"]
+    secret = resolve_secret(api_key or saved["api_key"], p.env_key)
+    cfg = make_config(provider_name, effective_model, secret, effective_base_url, temperature, max_tokens)
     messages: list[dict[str, str]] = []
     if system_prompt.strip():
         messages.append({"role": "system", "content": system_prompt.strip()})

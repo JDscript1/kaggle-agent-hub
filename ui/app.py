@@ -11,6 +11,7 @@ from core.system_info import collect
 from ui.chat import respond
 from ui.files import export_zip, open_file, refresh_tree, save_file, upload_files
 from ui.providers import initial_provider, provider_defaults
+from ui.settings import clear_api_settings, load_provider_setting, save_api_settings
 from providers.registry import names
 
 
@@ -125,10 +126,40 @@ def build_app() -> gr.Blocks:
         with gr.Tab("Settings"):
             gr.Markdown(
                 f"**Workspace:** `{CONFIG.workspace}`\n\n"
-                "Keys typed in the Provider panel are not written to disk by this project. "
-                "For public notebooks, prefer Kaggle Secrets or environment variables.\n\n"
-                "Direct API chat is intentionally separate from CLI-agent authentication. "
+                "API keys below are kept only in this notebook session and are never written to disk. "
+                "Environment variables and Kaggle Secrets remain supported.\n\n"
+                "Subscription accounts are separate: use the CLI Agents tab and the native login flow for Codex, Claude Code or Gemini CLI. "
                 "A ChatGPT/Claude/Gemini subscription login is not treated as an API key."
+            )
+            settings_provider = gr.Dropdown(names(), value=first, label="API provider")
+            with gr.Row():
+                settings_model = gr.Textbox(value=first_model, label="Default model")
+                settings_base_url = gr.Textbox(value=first_base, label="Base URL")
+            settings_api_key = gr.Textbox(label="API key (kept in memory only)", type="password")
+            settings_hint = gr.Markdown(f"Environment/Kaggle Secret: `{first_env}`")
+            with gr.Row():
+                settings_save = gr.Button("Save API settings", variant="primary")
+                settings_clear = gr.Button("Clear session API key")
+            settings_status = gr.Textbox(label="Status", interactive=False)
+
+            def load_settings(name, state):
+                model_value, base_value, hint = load_provider_setting(name, state)
+                return model_value, base_value, hint
+
+            settings_provider.change(
+                load_settings,
+                [settings_provider, session_state],
+                [settings_model, settings_base_url, settings_hint],
+            )
+            settings_save.click(
+                save_api_settings,
+                [session_state, settings_provider, settings_model, settings_base_url, settings_api_key],
+                [session_state, settings_status, settings_api_key],
+            )
+            settings_clear.click(
+                clear_api_settings,
+                [session_state, settings_provider],
+                [session_state, settings_status, settings_api_key],
             )
 
     return demo

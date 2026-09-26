@@ -4,7 +4,7 @@ A public, notebook-friendly multi-provider AI workspace built for **Kaggle first
 
 It combines two workflows in one UI:
 
-1. **Direct API chat** with OpenAI/Codex API, Anthropic, Gemini, DeepSeek, Kimi/Moonshot, OpenRouter, Mistral, Groq, Together, Fireworks, xAI and generic OpenAI-compatible endpoints.
+1. **Direct API chat** with OpenAI/Codex API, Anthropic, Gemini, DeepSeek, Qwen/DashScope, Kimi/Moonshot, OpenRouter, Mistral, Groq, Together, Fireworks, xAI and generic OpenAI-compatible endpoints.
 2. **Authenticated CLI coding agents** such as Codex CLI, Claude Code and Gemini CLI, running directly against a confined workspace.
 
 The project is intentionally designed for a YouTube tutorial: the Kaggle notebook itself can stay extremely small.
@@ -45,6 +45,8 @@ For direct API mode, use an API key from the provider. Values can come from:
 1. the password field in the UI,
 2. environment variables,
 3. Kaggle Secrets.
+
+You can also save a provider key, model and endpoint from the **Settings** tab. These values are held only in the active UI session and are not written to project files. The Settings key is used only for direct API chat; it is never injected into CLI-agent subscription logins.
 
 The standard secret names are documented in [`docs/PROVIDERS.md`](docs/PROVIDERS.md).
 
