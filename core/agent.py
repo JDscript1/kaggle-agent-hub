@@ -11,6 +11,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Any, Callable, Protocol
 
+from core.environment import runtime_context
 from core.logging_store import LOGS
 from core.tools import ToolRegistry, ToolResult
 
@@ -120,7 +121,7 @@ def run_agent(
     if timeout <= 0:
         raise AgentError("timeout must be positive.")
 
-    conversation = [dict(message) for message in messages]
+    conversation = [{"role": "system", "content": runtime_context()}, *[dict(message) for message in messages]]
     started = time.monotonic()
     total_tool_calls = 0
     tools = registry.schemas()
