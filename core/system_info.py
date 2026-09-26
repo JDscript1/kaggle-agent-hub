@@ -7,7 +7,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-import psutil
+try:
+    import psutil
+except ImportError:  # Termux/Android may not have a compatible psutil wheel.
+    psutil = None
 
 from core.config import CONFIG
 
@@ -20,14 +23,22 @@ def _cmd(command: list[str]) -> str:
 
 
 def collect() -> str:
-    vm = psutil.virtual_memory()
+    if psutil is not None:
+        memory_total = psutil.virtual_memory().total
+        memory_available = psutil.virtual_memory().available
+    else:
+        page_size = os.sysconf("SC_PAGE_SIZE")
+        total_pages = os.sysconf("SC_PHYS_PAGES")
+        available_pages = os.sysconf("SC_AVPHYS_PAGES")
+        memory_total = page_size * total_pages
+        memory_available = page_size * available_pages
     disk = shutil.disk_usage(CONFIG.workspace)
     gpu = _cmd(["nvidia-smi", "--query-gpu=name,memory.total,memory.free", "--format=csv,noheader"])
     rows = [
         f"Python: {sys.version.split()[0]}",
         f"OS: {platform.platform()}",
         f"CPU: {platform.processor() or platform.machine()}",
-        f"RAM: {vm.total / 2**30:.1f} GiB total / {vm.available / 2**30:.1f} GiB available",
+        f"RAM: {memory_total / 2**30:.1f} GiB total / {memory_available / 2**30:.1f} GiB available",
         f"Disk: {disk.total / 2**30:.1f} GiB total / {disk.free / 2**30:.1f} GiB free",
         f"Workspace: {CONFIG.workspace}",
         f"Kaggle detected: {Path('/kaggle/working').exists()}",

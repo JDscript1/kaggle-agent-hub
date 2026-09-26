@@ -38,3 +38,12 @@ def test_agent_injects_runtime_context_before_user_messages(monkeypatch, tmp_pat
     assert captured["messages"][0]["role"] == "system"
     assert "Automatic runtime context" in captured["messages"][0]["content"]
     assert captured["messages"][1]["content"] == "What environment is this?"
+
+
+def test_system_info_supports_platforms_without_psutil(monkeypatch):
+    from core import system_info
+
+    monkeypatch.setattr(system_info, "psutil", None)
+    report = system_info.collect()
+    assert "Python:" in report
+    assert "RAM:" in report
