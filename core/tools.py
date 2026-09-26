@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable
 
 from core.logging_store import LOGS
+from core.notebook import NotebookError, delete_cell, insert_cell, list_cells, read_cell, update_cell
 from core.terminal import TerminalError, execute_terminal
 from core.workspace import WorkspaceError, root, safe_path
 
@@ -309,6 +310,13 @@ def _terminal_exec(arguments: dict[str, Any]) -> ToolResult:
     return ToolResult.ok(result)
 
 
+def _notebook_call(function, arguments: dict[str, Any]) -> ToolResult:
+    try:
+        return ToolResult.ok(function(arguments))
+    except NotebookError as exc:
+        raise ToolError(str(exc)) from exc
+
+
 def default_tool_registry() -> ToolRegistry:
     """Build the filesystem tools used by the first coding-agent milestone."""
     return ToolRegistry(
@@ -349,6 +357,11 @@ def default_tool_registry() -> ToolRegistry:
                 {"type": "object", "required": ["command"], "properties": {"command": {"type": "string"}, "cwd": {"type": "string"}, "timeout": {"type": "integer", "default": 120}, "max_output": {"type": "integer", "default": 120000}}},
                 _terminal_exec,
             ),
+            AgentTool("list_cells", "List cells in a saved .ipynb file.", {"type": "object", "required": ["path"], "properties": {"path": {"type": "string"}}}, lambda args: _notebook_call(list_cells, args)),
+            AgentTool("read_cell", "Read one cell from a saved .ipynb file.", {"type": "object", "required": ["path", "index"], "properties": {"path": {"type": "string"}, "index": {"type": "integer"}}}, lambda args: _notebook_call(read_cell, args)),
+            AgentTool("insert_cell", "Insert a code, markdown, or raw cell into a saved .ipynb file.", {"type": "object", "required": ["path", "source"], "properties": {"path": {"type": "string"}, "index": {"type": "integer"}, "cell_type": {"type": "string"}, "source": {"type": "string"}}}, lambda args: _notebook_call(insert_cell, args)),
+            AgentTool("update_cell", "Update one cell in a saved .ipynb file and clear stale code outputs by default.", {"type": "object", "required": ["path", "index", "source"], "properties": {"path": {"type": "string"}, "index": {"type": "integer"}, "source": {"type": "string"}, "clear_outputs": {"type": "boolean"}}}, lambda args: _notebook_call(update_cell, args)),
+            AgentTool("delete_cell", "Delete one cell from a saved .ipynb file with an explicit empty-notebook safeguard.", {"type": "object", "required": ["path", "index"], "properties": {"path": {"type": "string"}, "index": {"type": "integer"}, "allow_empty": {"type": "boolean"}}}, lambda args: _notebook_call(delete_cell, args)),
         ]
     )
 

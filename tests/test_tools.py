@@ -14,7 +14,7 @@ def registry(tmp_path, monkeypatch):
 
 
 def test_registry_exposes_schemas_and_structured_results(registry):
-    assert registry.names() == ["read_file", "list_files", "search_files", "write_file", "patch_file", "terminal_exec"]
+    assert registry.names() == ["read_file", "list_files", "search_files", "write_file", "patch_file", "terminal_exec", "list_cells", "read_cell", "insert_cell", "update_cell", "delete_cell"]
     result = registry.execute("write_file", {"path": "src/app.py", "content": "print('ok')\n"})
     assert result.success
     assert result.to_dict()["data"]["path"] == "src/app.py"
@@ -95,3 +95,19 @@ def test_terminal_exec_masks_environment_values(registry, monkeypatch):
     assert result.success
     assert "super-secret-value" not in result.data["output"]
     assert "supe…alue" in result.data["output"]
+
+
+def test_notebook_tools_list_insert_update_and_delete_cells(registry, tmp_path):
+    notebook = tmp_path / "analysis.ipynb"
+    notebook.write_text('{"cells": [{"cell_type": "code", "metadata": {}, "source": ["print(1)\\n"], "outputs": [], "execution_count": 1}], "metadata": {}, "nbformat": 4, "nbformat_minor": 5}', encoding="utf-8")
+
+    listed = registry.execute("list_cells", {"path": "analysis.ipynb"})
+    assert listed.success and listed.data["count"] == 1
+    inserted = registry.execute("insert_cell", {"path": "analysis.ipynb", "index": 0, "cell_type": "markdown", "source": "# Title"})
+    assert inserted.success
+    updated = registry.execute("update_cell", {"path": "analysis.ipynb", "index": 1, "source": "print(2)"})
+    assert updated.success and updated.data["before"] == "print(1)\n"
+    read = registry.execute("read_cell", {"path": "analysis.ipynb", "index": 1})
+    assert read.data["source"] == "print(2)"
+    deleted = registry.execute("delete_cell", {"path": "analysis.ipynb", "index": 0})
+    assert deleted.success
