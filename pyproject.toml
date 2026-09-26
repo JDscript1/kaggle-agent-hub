@@ -1,0 +1,16 @@
+[project]
+name = "kaggle-agent-hub"
+version = "0.1.0"
+description = "Notebook-friendly multi-provider AI workspace and CLI agent launcher"
+requires-python = ">=3.10"
+dependencies = [
+  "gradio>=5.44,<7",
+  "httpx>=0.28,<1",
+  "pydantic>=2.11,<3",
+  "python-dotenv>=1.1,<2",
+  "psutil>=7,<8",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
