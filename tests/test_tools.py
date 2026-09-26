@@ -1,4 +1,5 @@
 from dataclasses import replace
+from pathlib import Path
 
 import pytest
 
@@ -13,7 +14,7 @@ def registry(tmp_path, monkeypatch):
 
 
 def test_registry_exposes_schemas_and_structured_results(registry):
-    assert registry.names() == ["read_file", "list_files", "search_files", "write_file", "patch_file"]
+    assert registry.names() == ["read_file", "list_files", "search_files", "write_file", "patch_file", "terminal_exec"]
     result = registry.execute("write_file", {"path": "src/app.py", "content": "print('ok')\n"})
     assert result.success
     assert result.to_dict()["data"]["path"] == "src/app.py"
@@ -68,3 +69,29 @@ def test_tool_registry_handles_unknown_tool_without_exception(registry):
     result = registry.execute("missing", {})
     assert not result.success
     assert result.error == "Unknown tool: missing"
+
+
+def test_terminal_exec_uses_workspace_and_returns_process_result(registry, tmp_path):
+    result = registry.execute("terminal_exec", {"command": "printf 'hello' > terminal.txt && pwd"})
+    assert result.success
+    assert result.data["exit_code"] == 0
+    assert result.data["cwd"] == "."
+    assert "hello" not in result.data["output"]
+    assert (tmp_path / "terminal.txt").read_text(encoding="utf-8") == "hello"
+
+
+def test_terminal_exec_reports_workspace_cwd_and_blocks_dangerous_commands(registry, tmp_path):
+    location = registry.execute("terminal_exec", {"command": "pwd"})
+    assert location.success
+    assert Path(location.data["output"].strip()).resolve() == tmp_path.resolve()
+    blocked = registry.execute("terminal_exec", {"command": "rm -rf /"})
+    assert not blocked.success
+    assert "safety policy" in blocked.error
+
+
+def test_terminal_exec_masks_environment_values(registry, monkeypatch):
+    monkeypatch.setenv("TEST_AGENT_SECRET", "super-secret-value")
+    result = registry.execute("terminal_exec", {"command": "printf '%s' \"$TEST_AGENT_SECRET\""})
+    assert result.success
+    assert "super-secret-value" not in result.data["output"]
+    assert "supe…alue" in result.data["output"]

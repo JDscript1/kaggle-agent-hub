@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable
 
 from core.logging_store import LOGS
+from core.terminal import TerminalError, execute_terminal
 from core.workspace import WorkspaceError, root, safe_path
 
 
@@ -295,6 +296,19 @@ def _patch_file(arguments: dict[str, Any]) -> ToolResult:
     return ToolResult.ok({"path": relative, "diff": diff, "replacements": occurrences})
 
 
+def _terminal_exec(arguments: dict[str, Any]) -> ToolResult:
+    try:
+        result = execute_terminal(
+            arguments.get("command"),
+            cwd=arguments.get("cwd"),
+            timeout=arguments.get("timeout", 120),
+            max_output=arguments.get("max_output", 120_000),
+        )
+    except TerminalError as exc:
+        raise ToolError(str(exc)) from exc
+    return ToolResult.ok(result)
+
+
 def default_tool_registry() -> ToolRegistry:
     """Build the filesystem tools used by the first coding-agent milestone."""
     return ToolRegistry(
@@ -328,6 +342,12 @@ def default_tool_registry() -> ToolRegistry:
                 "Apply one or more exact text replacements to a UTF-8 file and return a unified diff.",
                 {"type": "object", "required": ["path", "old_text", "new_text"], "properties": {"path": {"type": "string"}, "old_text": {"type": "string"}, "new_text": {"type": "string"}, "expected_replacements": {"type": "integer"}}},
                 _patch_file,
+            ),
+            AgentTool(
+                "terminal_exec",
+                "Run a controlled shell command in the active workspace.",
+                {"type": "object", "required": ["command"], "properties": {"command": {"type": "string"}, "cwd": {"type": "string"}, "timeout": {"type": "integer", "default": 120}, "max_output": {"type": "integer", "default": 120000}}},
+                _terminal_exec,
             ),
         ]
     )
