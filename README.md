@@ -14,7 +14,7 @@ The project is intentionally designed for a YouTube tutorial: the Kaggle noteboo
 ### Cell 1
 
 ```python
-!git clone https://github.com/Specter128/kaggle-agent-hub.git
+!git clone https://github.com/JDscript1/kaggle-agent-hub.git
 ```
 
 ### Cell 2

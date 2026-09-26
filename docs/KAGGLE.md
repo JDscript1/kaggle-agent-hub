@@ -5,7 +5,7 @@ Create a new Kaggle notebook, enable Internet if you need external APIs or the G
 ## Cell 1
 
 ```python
-!git clone https://github.com/Specter128/kaggle-agent-hub.git
+!git clone https://github.com/JDscript1/kaggle-agent-hub.git
 ```
 
 ## Cell 2

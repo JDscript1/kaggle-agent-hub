@@ -73,5 +73,5 @@ def make_config(name: str, model: str, api_key: str, base_url: str, temperature:
         base_url=(base_url or p.default_base_url).strip(),
         temperature=float(temperature),
         max_tokens=int(max_tokens),
-        extra_headers={"HTTP-Referer": "https://github.com/Specter128/kaggle-agent-hub", "X-Title": "Kaggle Agent Hub"} if name == "OpenRouter" else {},
+        extra_headers={"HTTP-Referer": "https://github.com/JDscript1/kaggle-agent-hub", "X-Title": "Kaggle Agent Hub"} if name == "OpenRouter" else {},
     )
